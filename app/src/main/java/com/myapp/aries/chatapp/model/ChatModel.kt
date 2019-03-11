@@ -12,19 +12,19 @@ import retrofit2.http.POST
 class ChatModel{
     interface ChatAPI{
         @GET("messages")
-        fun getMessage(): Single<Response<ResponseBody>>
+        fun getMessage(): Single<ArrayList<ChatContent>>
 
         @POST("")
-        fun sendMessage(@Body chatContent: ChatContent): Single<Response<ResponseBody>>
+        fun sendMessage(@Body sendChat: SendChat): Single<Response<ResponseBody>>
     }
 
     private val service = RetrofitManager.retrofit.create(ChatModel.ChatAPI::class.java)
 
-    fun getMessage():Single<Response<ResponseBody>>{
+    fun getMessage():Single<ArrayList<ChatContent>>{
         return service.getMessage()
     }
 
-    fun sendMessage(chatContent: ChatContent):Single<Response<ResponseBody>>{
-        return service.sendMessage(chatContent)
+    fun sendMessage(sendChat: SendChat):Single<Response<ResponseBody>>{
+        return service.sendMessage(sendChat)
     }
 }

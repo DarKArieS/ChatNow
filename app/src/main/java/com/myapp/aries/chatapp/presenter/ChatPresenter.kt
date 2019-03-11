@@ -13,8 +13,9 @@ class ChatPresenter(private val chatView: ChatView, private val chatModel: ChatM
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe {  }
             .doOnSuccess {
-                val responseString = it.body()!!.string()
-                println(responseString)
+//                val responseString = it.body()!!.string()
+//                println(responseString)
+                println(it)
             }
             .doOnError {
 
