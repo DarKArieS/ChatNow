@@ -19,6 +19,10 @@ class LoginFragment : Fragment(), LoginView {
     private val loginPresenter = LoginPresenter(this, loginModel)
     private var isProgressing = false
 
+    init{
+        println("LoginFragment created!")
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -33,22 +37,27 @@ class LoginFragment : Fragment(), LoginView {
         return rootView
     }
 
-    override fun navigateToChat(userID:Int) {
-        val chatFragment = ChatFragment.newInstance(userID)
+    override fun onDestroy() {
+        println("LoginFragment onDestroy")
+        super.onDestroy()
+    }
+
+    override fun navigateToChat(userID:Int, userName:String) {
+        val chatFragment = ChatFragment.newInstance(userID, userName)
         (activity as MainActivity).navigate(chatFragment)
     }
 
-    override fun startProgress() {
+    override fun startAsyncProgress() {
         isProgressing = true
         (activity as MainActivity).startProgress()
     }
 
-    override fun endProgress() {
+    override fun endAsyncProgress() {
         isProgressing = false
         (activity as MainActivity).endProgress()
     }
 
-    override fun connectingFail() {
+    override fun showConnectingFail() {
         Toast.makeText(activity, "連線失敗", Toast.LENGTH_SHORT).show()
     }
 }

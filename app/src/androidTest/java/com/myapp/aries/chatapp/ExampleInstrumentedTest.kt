@@ -19,6 +19,8 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getTargetContext()
-        assertEquals("com.app.aries.chatapp", appContext.packageName)
+        assertEquals("com.myapp.aries.chatapp", appContext.packageName)
+        println("testprint")
+
     }
 }

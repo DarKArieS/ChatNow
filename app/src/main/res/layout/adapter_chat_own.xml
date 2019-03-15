@@ -10,8 +10,15 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:id="@+id/ownChatTextView" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
-            app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="64dp"
-            android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:background="@drawable/adapter_char_own_background" android:padding="7dp"/>
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="100dp"
+            android:layout_marginTop="4dp" app:layout_constraintTop_toTopOf="parent"
+            android:background="@drawable/adapter_char_own_background" android:padding="10dp"
+            android:paddingStart="20dp"
+            app:layout_constraintBottom_toTopOf="@+id/ownDateTextView"/>
+    <TextView
+            android:text="TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/ownDateTextView" app:layout_constraintStart_toStartOf="@+id/ownChatTextView"
+            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="4dp" android:textSize="10sp"/>
 </android.support.constraint.ConstraintLayout>

@@ -10,18 +10,17 @@ class LoginPresenter(private val loginView: LoginView, private val loginModel: L
         loginModel.getUserID(userName)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { loginView.startProgress() }
+            .doOnSubscribe { loginView.startAsyncProgress() }
             .doOnSuccess {
                 val responseString = it.body()!!.string()
-                println(responseString)
+                //println(responseString)
                 val userID = responseString.toInt()
-                loginView.navigateToChat(userID)
-                loginView.endProgress()
+                loginView.navigateToChat(userID, userName)
             }
             .doOnError {
-                loginView.connectingFail()
-                loginView.endProgress()
+                loginView.showConnectingFail()
             }
+            .doFinally { loginView.endAsyncProgress() }
             .subscribe()
     }
 }

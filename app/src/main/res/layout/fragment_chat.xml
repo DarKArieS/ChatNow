@@ -7,30 +7,41 @@
     <EditText
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:inputType="textPersonName"
             android:ems="10"
             android:id="@+id/editText"
             app:layout_constraintEnd_toStartOf="@+id/sendButton" android:layout_marginEnd="8dp"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
-            android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent"/>
+            android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent"
+            android:inputType="textMultiLine"
+            android:imeOptions="flagNoExtractUi"/>
     <Button
             android:text="Send"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/sendButton" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
+            android:id="@+id/sendButton"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent"/>
-    <android.support.v7.widget.RecyclerView
-            android:layout_width="0dp"
+
+    <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshLayout"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/showTextView" android:id="@+id/charRecyclerView"/>
+            app:layout_constraintBottom_toTopOf="@+id/showNameTextView">
+        <android.support.v7.widget.RecyclerView
+                android:id="@+id/charRecyclerView"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:fadeScrollbars="true"
+                android:scrollbars="vertical" android:fadingEdge="vertical" android:requiresFadingEdge="vertical"/>
+    </android.support.v4.widget.SwipeRefreshLayout>
     <TextView
             android:text="Name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/showTextView" android:layout_marginBottom="4dp"
-            app:layout_constraintBottom_toTopOf="@+id/editText" android:textSize="8sp"
+            android:id="@+id/showNameTextView" android:layout_marginBottom="4dp"
+            app:layout_constraintBottom_toTopOf="@+id/editText" android:textSize="12sp"
             app:layout_constraintStart_toStartOf="@+id/editText"/>
 </android.support.constraint.ConstraintLayout>
