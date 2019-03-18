@@ -1,6 +1,7 @@
 package com.myapp.aries.chatapp.presenter
 
 
+import com.myapp.aries.chatapp.model.ChatContent
 import com.myapp.aries.chatapp.model.ChatModel
 import com.myapp.aries.chatapp.model.SendChat
 import com.myapp.aries.chatapp.model.UserInfo
@@ -16,6 +17,7 @@ class ChatPresenter(private val chatView: ChatView, private var chatModel: ChatM
     }
 
     var userInfo = UserInfo()
+    var chatList = mutableListOf<ChatContent>()
 
     fun getNewMessage(){
         chatModel.getMessage()
@@ -37,6 +39,7 @@ class ChatPresenter(private val chatView: ChatView, private var chatModel: ChatM
     }
 
     fun sendMessage(msg:String){
+        if (msg == "") return
         chatModel.sendMessage(SendChat(userInfo.userID,msg))
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

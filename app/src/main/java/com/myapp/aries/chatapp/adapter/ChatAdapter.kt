@@ -19,6 +19,7 @@ class ChatAdapter (val context: Context, val chatItemList: List<ChatContent>, va
     }
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): RecyclerView.ViewHolder {
+        //println("RecyclerView: onCreate ViewHolder $p1")
         return if(p1==0){
             val view = LayoutInflater.from(p0.context).inflate(R.layout.adapter_chat_own, p0, false)
             OwnViewHolder(view)
@@ -31,6 +32,7 @@ class ChatAdapter (val context: Context, val chatItemList: List<ChatContent>, va
     override fun getItemCount(): Int = this.chatItemList.count()
 
     override fun onBindViewHolder(p0: RecyclerView.ViewHolder, p1: Int) {
+        //println("RecyclerView: current onBind: $p1")
         (p0 as CustomViewHolder).bind(chatItemList[p1])
     }
 
@@ -39,6 +41,10 @@ class ChatAdapter (val context: Context, val chatItemList: List<ChatContent>, va
     }
 
     inner class GuestViewHolder(itemView: View): RecyclerView.ViewHolder(itemView), CustomViewHolder{
+        init{
+            val a = this.hashCode()
+            //println("GuestViewHolder created: $a")
+        }
         private val guestNameTextView = itemView.guestNameTextView
         private val guestChatTextView = itemView.guestChatTextView
         private val guestDateTextView = itemView.guestDateTextView
@@ -50,6 +56,10 @@ class ChatAdapter (val context: Context, val chatItemList: List<ChatContent>, va
     }
 
     inner class OwnViewHolder(itemView: View): RecyclerView.ViewHolder(itemView), CustomViewHolder{
+        init{
+            val a = this.hashCode()
+            //println("OwnViewHolder created: $a")
+        }
         private val ownChatTextView = itemView.ownChatTextView
         private val ownDateTextView = itemView.ownDateTextView
         override fun bind(chatItem: ChatContent) {

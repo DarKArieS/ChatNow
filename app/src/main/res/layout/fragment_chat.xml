@@ -3,6 +3,8 @@
                                              xmlns:tools="http://schemas.android.com/tools"
                                              android:layout_width="match_parent"
                                              android:layout_height="match_parent"
+                                             android:focusable="true"
+                                             android:focusableInTouchMode="true"
                                              tools:context="com.myapp.aries.chatapp.ChatFragment">
     <EditText
             android:layout_width="0dp"
@@ -35,7 +37,8 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:fadeScrollbars="true"
-                android:scrollbars="vertical" android:fadingEdge="vertical" android:requiresFadingEdge="vertical"/>
+                android:scrollbars="vertical" android:fadingEdge="vertical"
+                android:requiresFadingEdge="vertical"/>
     </android.support.v4.widget.SwipeRefreshLayout>
     <TextView
             android:text="Name"
@@ -44,4 +47,14 @@
             android:id="@+id/showNameTextView" android:layout_marginBottom="4dp"
             app:layout_constraintBottom_toTopOf="@+id/editText" android:textSize="12sp"
             app:layout_constraintStart_toStartOf="@+id/editText"/>
+    <android.support.design.widget.FloatingActionButton
+            android:src="@drawable/ic_arrow_downward_black_24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true" android:id="@+id/floatingActionButton"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="@+id/swipeRefreshLayout"
+            app:backgroundTint="?attr/colorButtonNormal" android:visibility="invisible"
+            app:fabSize="mini"/>
 </android.support.constraint.ConstraintLayout>
