@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.myapp.aries.chatapp.adapter.ChatAdapter
 import com.myapp.aries.chatapp.model.ChatContent
 import com.myapp.aries.chatapp.model.ChatModel
@@ -24,7 +25,7 @@ class ChatFragment : Fragment(), ChatView {
         @JvmStatic
         fun newInstance(userID: Int, userName: String) =
             ChatFragment().apply {
-                arguments = Bundle().apply {
+                arguments = Bundle().apply{
                     println("ChatFragment newInstance apply:")
                     putInt("ARG_USERID", userID)
                     putString("ARG_USERNAME", userName)
@@ -66,13 +67,14 @@ class ChatFragment : Fragment(), ChatView {
         rootView.swipeRefreshLayout.setOnRefreshListener{
             chatPresenter.refreshMessage{
                 rootView.swipeRefreshLayout.isRefreshing=false
+                rootView.floatingActionButton.hide()
             }
         }
 
-        chatPresenter.getNewMessage()
+        setupAdapter(chatPresenter.chatList)
+        chatPresenter.getMessage()
         chatPresenter.startChatSocket()
-        rootView.floatingActionButton.setOnClickListener {scrollToLast();rootView.floatingActionButton.hide();}
-        rootView.floatingActionButton.hide()
+        rootView.floatingActionButton.setOnClickListener {scrollToLast()}
 
         (activity as MainActivity).noHideSoftInputViewList.add(rootView.sendButton)
 
@@ -119,10 +121,11 @@ class ChatFragment : Fragment(), ChatView {
 
     override fun onDestroy() {
         println("ChatFragment onDestroy")
+        chatPresenter.cancelRequests()
         super.onDestroy()
     }
 
-    override fun setupAdapter(chatList: List<ChatContent>){
+    private fun setupAdapter(chatList: List<ChatContent>){
         rootView.charRecyclerView.adapter = ChatAdapter(this.context!!, chatList, chatPresenter.userInfo.userID)
 
         val layoutManager = LinearLayoutManager(this.context!!)
@@ -151,15 +154,22 @@ class ChatFragment : Fragment(), ChatView {
     }
 
     override fun receiveNewMessage(){
+        //setupAdapter(chatPresenter.chatList)
+        rootView.charRecyclerView.adapter?.notifyDataSetChanged()
         scrollToLast()
     }
 
     private fun scrollToLast(){
         rootView.charRecyclerView.smoothScrollToPosition(rootView.charRecyclerView.adapter!!.itemCount - 1)
+        rootView.floatingActionButton.hide()
     }
 
     override fun sendMessage() {
-        chatPresenter.getNewMessage()
+        chatPresenter.getMessage()
+    }
+
+    override fun showConnectingFail() {
+        Toast.makeText(this.context, "連線失敗", Toast.LENGTH_SHORT).show()
     }
 
 }

@@ -10,6 +10,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
+import io.reactivex.disposables.CompositeDisposable
 
 class ChatPresenter(private val chatView: ChatView, private var chatModel: ChatModel){
     init{
@@ -19,35 +20,48 @@ class ChatPresenter(private val chatView: ChatView, private var chatModel: ChatM
     var userInfo = UserInfo()
     var chatList = mutableListOf<ChatContent>()
 
-    fun getNewMessage(){
-        chatModel.getMessage()
+    private var observableList = CompositeDisposable()
+
+    fun getMessage(){
+        observableList.add(
+            chatModel
+            .getMessage()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSuccess {
-                chatView.setupAdapter(it)
+                chatList.clear()
+                chatList.addAll( it as Collection<ChatContent>)
                 chatView.receiveNewMessage()
-            }.subscribe()
+            }.subscribe({},{chatView.showConnectingFail()})
+        )
     }
 
     fun refreshMessage(callback:()->Unit){
-        chatModel.getMessage()
+        observableList.add(chatModel
+            .getMessage()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSuccess {
-                chatView.setupAdapter(it)
-            }.doFinally { callback.invoke() }.subscribe()
+                chatList.clear()
+                chatList.addAll( it as Collection<ChatContent>)
+                chatView.receiveNewMessage()
+            }.doFinally { callback.invoke() }
+            .subscribe({},{chatView.showConnectingFail()})
+        )
     }
 
     fun sendMessage(msg:String){
         if (msg == "") return
-        chatModel.sendMessage(SendChat(userInfo.userID,msg))
+        observableList.add(chatModel
+            .sendMessage(SendChat(userInfo.userID,msg))
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe {}
             .doOnSuccess {
                 chatView.sendMessage()
             }
-            .subscribe()
+            .subscribe({},{chatView.showConnectingFail()})
+        )
     }
 
     fun startChatSocket(){
@@ -84,11 +98,11 @@ class ChatPresenter(private val chatView: ChatView, private var chatModel: ChatM
             override fun call(vararg args: Any?) {
                 println("ChatPresenter: socket: chatRoom:messages get!")
                 for (msg in args) println(msg)
-                getNewMessage()
+                getMessage()
             }
         })
         println("ChatPresenter: socket io connection!")
-        chatModel.socket.connect()
+        if(!chatModel.socket.connected())chatModel.socket.connect()
     }
 
     fun stopChatSocket(){
@@ -97,5 +111,7 @@ class ChatPresenter(private val chatView: ChatView, private var chatModel: ChatM
         println("ChatPresenter: socket io disconnection!")
     }
 
-
+    fun cancelRequests(){
+        observableList.clear()
+    }
 }

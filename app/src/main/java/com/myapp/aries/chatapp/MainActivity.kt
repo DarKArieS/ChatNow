@@ -9,6 +9,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import com.myapp.aries.chatapp.utilities.EventCollector
 import kotlinx.android.synthetic.main.activity_main.*
 
 private const val ARG_FRAG_LOGIN = "ARG_FRAG_LOGIN"
@@ -17,12 +18,20 @@ private enum class FragmentStatus{SAME,EXIST,ABSENCE}
 
 class MainActivity : AppCompatActivity() {
     private var currentFrag = ARG_FRAG_LOGIN
+    var refreshUIEvent = EventCollector()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        if(savedInstanceState!=null)
-            currentFrag = savedInstanceState.getString("CURRENT_FRAG",ARG_FRAG_LOGIN)
+        println("Activity onCreate")
+        if(savedInstanceState!=null) {
+            println("----------------show Bundle----------------")
+            for ( key in savedInstanceState.keySet()){
+                println(key)
+            }
+            println("--------------------------------------------")
+            currentFrag = savedInstanceState.getString("CURRENT_FRAG", ARG_FRAG_LOGIN)
+        }
 
         startShowFragment()
     }
@@ -30,14 +39,15 @@ class MainActivity : AppCompatActivity() {
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         println("Activity onSaveInstanceState")
         savedInstanceState.putString("CURRENT_FRAG", currentFrag)
-        println("----------------show Bundle----------------")
-        for ( key in savedInstanceState!!.keySet()){
-            println(key)
-        }
-        println("--------------------------------------------")
+//        println("----------------show Bundle----------------")
+//        for ( key in savedInstanceState!!.keySet()){
+//            println(key)
+//        }
+//        println("--------------------------------------------")
         super.onSaveInstanceState(savedInstanceState)
     }
 
+    /*
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         println("Activity onRestoreInstanceState")
         if (savedInstanceState!=null){
@@ -48,22 +58,27 @@ class MainActivity : AppCompatActivity() {
             println("--------------------------------------------")
         }
         super.onRestoreInstanceState(savedInstanceState)
+    }*/
+
+    override fun onDestroy() {
+        println("MainActivity onDestroy")
+
+        super.onDestroy()
     }
 
     private fun startShowFragment(){
         if(checkFragmentStatus(currentFrag) == FragmentStatus.ABSENCE){
             when(currentFrag){
                 ARG_FRAG_LOGIN->{
-                    val loginFragment = LoginFragment()
+                    val loginFragment = LoginFragment.newInstance()
                     this.supportFragmentManager.beginTransaction()
                         .add(R.id.mainFragmentContainer,loginFragment, ARG_FRAG_LOGIN).commit()
                 }
-                ARG_FRAG_CHAT->{
-
+                else->{
+                    //do nothing
                 }
             }
         }
-
     }
 
     private fun checkFragmentStatus(tag:String):FragmentStatus{
@@ -75,6 +90,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // fragment manager extension functions, I will use them one day :D
     private fun getCurrentFragment(){
 
     }
@@ -84,22 +100,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun navigate(fragment: Fragment){
-        val myManager = this.supportFragmentManager
-        val fragTag = when{
-            (fragment is LoginFragment)->{ARG_FRAG_LOGIN}
-            (fragment is ChatFragment)->{ARG_FRAG_CHAT}
-            else->""
-        }
-        val transaction = myManager.beginTransaction()
-        transaction.setCustomAnimations(
-            R.anim.slide_in_right,
-            R.anim.slide_out_left,
-            R.anim.slide_in_left,
-            R.anim.slide_out_right
-        )
-        transaction.replace(R.id.mainFragmentContainer, fragment, fragTag)
-        transaction.addToBackStack(null)
-        transaction.commit()
+        refreshUIEvent.post {
+            println("refreshUIEvent: I'm running!")
+            val myManager = this.supportFragmentManager
+            val fragTag = when{
+                (fragment is LoginFragment)->{ARG_FRAG_LOGIN}
+                (fragment is ChatFragment)->{ARG_FRAG_CHAT}
+                else->""
+            }
+            val transaction = myManager.beginTransaction()
+            transaction.setCustomAnimations(
+                R.anim.slide_in_right,
+                R.anim.slide_out_left,
+                R.anim.slide_in_left,
+                R.anim.slide_out_right
+            )
+            transaction.replace(R.id.mainFragmentContainer, fragment, fragTag)
+            transaction.addToBackStack(null)
+            transaction.commit()
+        }.run()
     }
 
     fun startProgress(){
@@ -108,6 +127,19 @@ class MainActivity : AppCompatActivity() {
 
     fun endProgress(){
         progressBar.visibility = View.INVISIBLE
+    }
+
+    override fun onPause() {
+        super.onPause()
+        refreshUIEvent.executable = false
+    }
+
+    override fun onPostResume() {
+        super.onPostResume()
+        refreshUIEvent.executable = true
+        if(refreshUIEvent.isSuspended()){
+            refreshUIEvent.run()
+        }
     }
 
     //===================================================================================

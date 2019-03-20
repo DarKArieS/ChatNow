@@ -12,12 +12,18 @@ import com.myapp.aries.chatapp.presenter.LoginPresenter
 import com.myapp.aries.chatapp.view.LoginView
 import kotlinx.android.synthetic.main.fragment_login.view.*
 
-class LoginFragment : Fragment(), LoginView {
+class LoginFragment() : Fragment(), LoginView {
     private lateinit var rootView:View
+    private var mainActivity : MainActivity? = null
 
     private val loginModel = LoginModel()
     private val loginPresenter = LoginPresenter(this, loginModel)
     private var isProgressing = false
+
+    companion object {
+        @JvmStatic
+        fun newInstance() = LoginFragment()
+    }
 
     init{
         println("LoginFragment created!")
@@ -34,8 +40,15 @@ class LoginFragment : Fragment(), LoginView {
             if(!isProgressing)
                 loginPresenter.login( rootView.nameEditText.editableText.toString() )
         }
+        mainActivity = activity as MainActivity
         return rootView
     }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+    }
+
+
 
     override fun onDestroy() {
         println("LoginFragment onDestroy")
@@ -44,17 +57,17 @@ class LoginFragment : Fragment(), LoginView {
 
     override fun navigateToChat(userID:Int, userName:String) {
         val chatFragment = ChatFragment.newInstance(userID, userName)
-        (activity as MainActivity).navigate(chatFragment)
+        mainActivity?.navigate(chatFragment)
     }
 
     override fun startAsyncProgress() {
         isProgressing = true
-        (activity as MainActivity).startProgress()
+        mainActivity?.startProgress()
     }
 
     override fun endAsyncProgress() {
         isProgressing = false
-        (activity as MainActivity).endProgress()
+        mainActivity?.endProgress()
     }
 
     override fun showConnectingFail() {
