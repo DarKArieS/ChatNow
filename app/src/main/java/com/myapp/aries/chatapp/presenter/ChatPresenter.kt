@@ -1,10 +1,7 @@
 package com.myapp.aries.chatapp.presenter
 
 
-import com.myapp.aries.chatapp.model.ChatContent
-import com.myapp.aries.chatapp.model.ChatModel
-import com.myapp.aries.chatapp.model.SendChat
-import com.myapp.aries.chatapp.model.UserInfo
+import com.myapp.aries.chatapp.model.*
 import com.myapp.aries.chatapp.view.ChatView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -22,6 +19,26 @@ class ChatPresenter(private val chatView: ChatView, private var chatModel: ChatM
 
     private var observableList = CompositeDisposable()
 
+    fun updateUserId(userName:String, callback: () -> Unit){
+        if(userInfo.userID!=-1){
+            callback.invoke()
+        }else{
+            observableList.add(chatModel.getUserID(userName)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { chatView.startAsyncProgress() }
+                .doFinally { chatView.endAsyncProgress() }
+                .subscribe({
+                    val responseString = it.body()!!.string()
+                    //println(responseString)
+                    userInfo.userID = responseString.toInt()
+                    userInfo.userName = userName
+                    callback.invoke()
+                },{chatView.showConnectingFail()})
+            )
+        }
+    }
+
     fun getMessage(){
         observableList.add(
             chatModel
@@ -32,6 +49,7 @@ class ChatPresenter(private val chatView: ChatView, private var chatModel: ChatM
                 chatList.clear()
                 chatList.addAll( it as Collection<ChatContent>)
                 chatView.receiveNewMessage()
+                //ToDo: Don't refresh all message, just update new one!
             }.subscribe({},{chatView.showConnectingFail()})
         )
     }
@@ -71,12 +89,12 @@ class ChatPresenter(private val chatView: ChatView, private var chatModel: ChatM
                 for (msg in args) println(msg)
             }
         })
-//        chatModel.socket.on(Socket.EVENT_PING, object: Emitter.Listener{
-//            override fun call(vararg args: Any?) {
-//                println("socket: ping!")
-//                for (msg in args) println(msg)
-//            }
-//        })
+        chatModel.socket.on(Socket.EVENT_PING, object: Emitter.Listener{
+            override fun call(vararg args: Any?) {
+                println("socket: ping!")
+                for (msg in args) println(msg)
+            }
+        })
 
         chatModel.socket.on(Socket.EVENT_DISCONNECT, object: Emitter.Listener{
             override fun call(vararg args: Any?) {
@@ -102,6 +120,7 @@ class ChatPresenter(private val chatView: ChatView, private var chatModel: ChatM
             }
         })
         println("ChatPresenter: socket io connection!")
+
         if(!chatModel.socket.connected())chatModel.socket.connect()
     }
 

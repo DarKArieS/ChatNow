@@ -1,6 +1,7 @@
 package com.myapp.aries.chatapp.presenter
 
 import com.myapp.aries.chatapp.model.LoginModel
+import com.myapp.aries.chatapp.model.MainModel
 import com.myapp.aries.chatapp.view.LoginView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers

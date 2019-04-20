@@ -5,4 +5,7 @@ interface ChatView{
     fun receiveNewMessage()
     fun showConnectingFail()
 
+    fun startAsyncProgress()
+    fun endAsyncProgress()
+
 }

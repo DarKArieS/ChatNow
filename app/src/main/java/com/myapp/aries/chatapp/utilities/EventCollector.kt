@@ -2,6 +2,9 @@ package com.myapp.aries.chatapp.utilities
 
 import android.os.Handler
 
+/* Avoid some callbacks run when the activity is paused.
+ */
+
 class EventCollector{
     private val handler = Handler()
     private var collectList = mutableListOf<()->Unit>()

@@ -1,5 +1,6 @@
 package com.myapp.aries.chatapp
 
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
@@ -11,6 +12,7 @@ import android.widget.Toast
 import com.myapp.aries.chatapp.adapter.ChatAdapter
 import com.myapp.aries.chatapp.model.ChatContent
 import com.myapp.aries.chatapp.model.ChatModel
+import com.myapp.aries.chatapp.model.MainModel
 import com.myapp.aries.chatapp.presenter.ChatPresenter
 import com.myapp.aries.chatapp.view.ChatView
 import kotlinx.android.synthetic.main.fragment_chat.view.*
@@ -20,6 +22,7 @@ class ChatFragment : Fragment(), ChatView {
     private lateinit var rootView : View
     private var chatModel = ChatModel()
     private var chatPresenter = ChatPresenter(this, chatModel)
+    private var mainActivity : MainActivity? = null
 
     companion object {
         @JvmStatic
@@ -31,6 +34,15 @@ class ChatFragment : Fragment(), ChatView {
                     putString("ARG_USERNAME", userName)
                 }
             }
+
+        fun newInstance() =
+            ChatFragment().apply {
+                arguments = Bundle().apply{
+                    // No UserInfo
+                    putInt("ARG_USERID", -1)
+                    putString("ARG_USERNAME", "")
+                }
+            }
     }
 
     init{
@@ -40,16 +52,23 @@ class ChatFragment : Fragment(), ChatView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            chatPresenter.userInfo.userID = it.getInt("ARG_USERID")
+            chatPresenter.userInfo.userID = it.getInt("ARG_USERID",-1)
             chatPresenter.userInfo.userName = it.getString("ARG_USERNAME","")
 
-            println("ChatFragment: show argument")
-            println("----------------show Bundle----------------")
-            for ( key in it.keySet()){
-                println(key)
-            }
-            println("--------------------------------------------")
+//            println("ChatFragment: show argument")
+//            println("----------------show Bundle----------------")
+//            for ( key in it.keySet()){
+//                println(key)
+//            }
+//            println("--------------------------------------------")
         }
+    }
+
+    override fun onAttach(context: Context?) {
+        if (context is MainActivity){
+            mainActivity = activity as MainActivity
+        }
+        super.onAttach(context)
     }
 
     override fun onCreateView(
@@ -58,7 +77,11 @@ class ChatFragment : Fragment(), ChatView {
     ): View? {
         rootView = inflater.inflate(R.layout.fragment_chat, container, false)
 
-        rootView.showNameTextView.text = chatPresenter.userInfo.userName
+        mainActivity?.setUpActionBarHomeButton {
+            // logout
+            mainActivity?.navigate("LoginFragment")
+            MainModel.setCurrentUserName(this.context!!,"")
+        }
 
         rootView.sendButton.setOnClickListener {
             chatPresenter.sendMessage(rootView.editText.editableText.toString())
@@ -71,12 +94,26 @@ class ChatFragment : Fragment(), ChatView {
             }
         }
 
-        setupAdapter(chatPresenter.chatList)
-        chatPresenter.getMessage()
+        //println(chatPresenter.userInfo.userID)
+        chatPresenter.updateUserId(MainModel.getCurrentUserName(this.context!!,"")){
+            arguments = Bundle().apply{
+                putInt("ARG_USERID", chatPresenter.userInfo.userID)
+                putString("ARG_USERNAME", chatPresenter.userInfo.userName)
+            }
+            rootView.showNameTextView.text = chatPresenter.userInfo.userName
+            setupAdapter(chatPresenter.chatList)
+            MainModel.setCurrentUserName(this.context!!,chatPresenter.userInfo.userName)
+            chatPresenter.refreshMessage{}
+        }
+
+
         chatPresenter.startChatSocket()
         rootView.floatingActionButton.setOnClickListener {scrollToLast()}
 
         (activity as MainActivity).noHideSoftInputViewList.add(rootView.sendButton)
+
+        //ToDo this guy's touch event can be sent to the views behind it!
+        (activity as MainActivity).noHideSoftInputViewList.add(rootView.floatingActionButton)
 
         return rootView
     }
@@ -170,6 +207,14 @@ class ChatFragment : Fragment(), ChatView {
 
     override fun showConnectingFail() {
         Toast.makeText(this.context, "連線失敗", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun startAsyncProgress() {
+        mainActivity?.startProgress()
+    }
+
+    override fun endAsyncProgress() {
+        mainActivity?.endProgress()
     }
 
 }

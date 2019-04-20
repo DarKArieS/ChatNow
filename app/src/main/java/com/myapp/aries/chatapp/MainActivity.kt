@@ -5,60 +5,26 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.app.Fragment
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import com.myapp.aries.chatapp.model.MainModel
 import com.myapp.aries.chatapp.utilities.EventCollector
+import com.myapp.aries.chatapp.utilities.NavigationManager
 import kotlinx.android.synthetic.main.activity_main.*
 
-private const val ARG_FRAG_LOGIN = "ARG_FRAG_LOGIN"
-private const val ARG_FRAG_CHAT = "ARG_FRAG_CHAT"
-private enum class FragmentStatus{SAME,EXIST,ABSENCE}
-
 class MainActivity : AppCompatActivity() {
-    private var currentFrag = ARG_FRAG_LOGIN
+    private lateinit var navigationManager : NavigationManager
     var refreshUIEvent = EventCollector()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         println("Activity onCreate")
-        if(savedInstanceState!=null) {
-            println("----------------show Bundle----------------")
-            for ( key in savedInstanceState.keySet()){
-                println(key)
-            }
-            println("--------------------------------------------")
-            currentFrag = savedInstanceState.getString("CURRENT_FRAG", ARG_FRAG_LOGIN)
-        }
-
         startShowFragment()
     }
-
-    override fun onSaveInstanceState(savedInstanceState: Bundle) {
-        println("Activity onSaveInstanceState")
-        savedInstanceState.putString("CURRENT_FRAG", currentFrag)
-//        println("----------------show Bundle----------------")
-//        for ( key in savedInstanceState!!.keySet()){
-//            println(key)
-//        }
-//        println("--------------------------------------------")
-        super.onSaveInstanceState(savedInstanceState)
-    }
-
-    /*
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-        println("Activity onRestoreInstanceState")
-        if (savedInstanceState!=null){
-            println("----------------show Bundle----------------")
-            for ( key in savedInstanceState.keySet()){
-                println(key)
-            }
-            println("--------------------------------------------")
-        }
-        super.onRestoreInstanceState(savedInstanceState)
-    }*/
 
     override fun onDestroy() {
         println("MainActivity onDestroy")
@@ -67,57 +33,31 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startShowFragment(){
-        if(checkFragmentStatus(currentFrag) == FragmentStatus.ABSENCE){
-            when(currentFrag){
-                ARG_FRAG_LOGIN->{
-                    val loginFragment = LoginFragment.newInstance()
-                    this.supportFragmentManager.beginTransaction()
-                        .add(R.id.mainFragmentContainer,loginFragment, ARG_FRAG_LOGIN).commit()
-                }
-                else->{
-                    //do nothing
+        navigationManager = object: NavigationManager(
+            this.supportFragmentManager,
+            R.id.mainFragmentContainer,
+            MainModel.getCurrentFragmentTag(this,"LoginFragment")
+        ){
+            override fun createFragment(tag: String): Fragment? {
+                return when(tag){
+                    "LoginFragment"-> LoginFragment.newInstance()
+                    "ChatFragment"-> ChatFragment.newInstance() //ToDo
+                    else->null
                 }
             }
         }
     }
 
-    private fun checkFragmentStatus(tag:String):FragmentStatus{
-        val foundFrag = this.supportFragmentManager.findFragmentByTag(tag)
-        return when{
-            (foundFrag == null)->FragmentStatus.ABSENCE
-            foundFrag.isVisible->FragmentStatus.SAME
-            else->FragmentStatus.EXIST
-        }
+    fun navigate(tag:String){
+        refreshUIEvent.post {
+            navigationManager.navigateTo(tag)
+        }.run()
     }
 
-    // fragment manager extension functions, I will use them one day :D
-    private fun getCurrentFragment(){
-
-    }
-
-    private fun showFragment(tag:String){
-
-    }
-
-    fun navigate(fragment: Fragment){
+    fun navigate(tag:String, fragment: Fragment){
         refreshUIEvent.post {
             println("refreshUIEvent: I'm running!")
-            val myManager = this.supportFragmentManager
-            val fragTag = when{
-                (fragment is LoginFragment)->{ARG_FRAG_LOGIN}
-                (fragment is ChatFragment)->{ARG_FRAG_CHAT}
-                else->""
-            }
-            val transaction = myManager.beginTransaction()
-            transaction.setCustomAnimations(
-                R.anim.slide_in_right,
-                R.anim.slide_out_left,
-                R.anim.slide_in_left,
-                R.anim.slide_out_right
-            )
-            transaction.replace(R.id.mainFragmentContainer, fragment, fragTag)
-            transaction.addToBackStack(null)
-            transaction.commit()
+            navigationManager.navigateTo(tag,fragment)
         }.run()
     }
 
@@ -129,9 +69,32 @@ class MainActivity : AppCompatActivity() {
         progressBar.visibility = View.INVISIBLE
     }
 
+    private var mHomeButtonCallback : (()->Unit)? = null
+    fun setUpActionBarHomeButton(callback:()->Unit){
+        mHomeButtonCallback = callback
+        this.supportActionBar?.setHomeButtonEnabled(true)
+        this.supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+
+    fun removeActionBarHomeButton(){
+        mHomeButtonCallback=null
+        this.supportActionBar?.setHomeButtonEnabled(false)
+        this.supportActionBar?.setDisplayHomeAsUpEnabled(false)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when(item?.itemId){
+            android.R.id.home->{
+                mHomeButtonCallback?.invoke()
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
     override fun onPause() {
         super.onPause()
         refreshUIEvent.executable = false
+        MainModel.setCurrentFragmentTag(this,navigationManager.currentFragmentTag)
     }
 
     override fun onPostResume() {

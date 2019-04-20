@@ -1,6 +1,7 @@
 package com.myapp.aries.chatapp
 
 
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -29,6 +30,13 @@ class LoginFragment() : Fragment(), LoginView {
         println("LoginFragment created!")
     }
 
+    override fun onAttach(context: Context?) {
+        if (context is MainActivity){
+            mainActivity = activity as MainActivity
+        }
+        super.onAttach(context)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -40,15 +48,10 @@ class LoginFragment() : Fragment(), LoginView {
             if(!isProgressing)
                 loginPresenter.login( rootView.nameEditText.editableText.toString() )
         }
-        mainActivity = activity as MainActivity
+
+        mainActivity?.removeActionBarHomeButton()
         return rootView
     }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-    }
-
-
 
     override fun onDestroy() {
         println("LoginFragment onDestroy")
@@ -57,7 +60,7 @@ class LoginFragment() : Fragment(), LoginView {
 
     override fun navigateToChat(userID:Int, userName:String) {
         val chatFragment = ChatFragment.newInstance(userID, userName)
-        mainActivity?.navigate(chatFragment)
+        mainActivity?.navigate("ChatFragment",chatFragment)
     }
 
     override fun startAsyncProgress() {

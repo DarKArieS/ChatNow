@@ -8,6 +8,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 
 class ChatModel{
@@ -21,6 +22,9 @@ class ChatModel{
 
         @POST("messages")
         fun sendMessage(@Body sendChat: SendChat): Single<Response<ResponseBody>>
+
+        @GET("getuserid")
+        fun getUserIDRx(@Query("user") userId: String): Single<Response<ResponseBody>>
     }
 
     private val service = RetrofitManager.retrofit.create(ChatModel.ChatAPI::class.java)
@@ -31,6 +35,10 @@ class ChatModel{
 
     fun sendMessage(sendChat: SendChat):Single<Response<ResponseBody>>{
         return service.sendMessage(sendChat)
+    }
+
+    fun getUserID(userName:String):Single<Response<ResponseBody>>{
+        return service.getUserIDRx(userName)
     }
 
     val socket = IO.socket("http://chatroom.sckao.space:3000/")!!
