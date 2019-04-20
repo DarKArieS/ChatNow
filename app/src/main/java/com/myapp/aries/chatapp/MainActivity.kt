@@ -149,7 +149,8 @@ class MainActivity : AppCompatActivity() {
     private fun isTouchNoHideSoftInputView(x:Float, y:Float): Boolean{
         for (view in noHideSoftInputViewList){
             if(view.isAttachedToWindow)
-                return isViewTouched(view,x,y)
+                if (isViewTouched(view,x,y))
+                    return true
         }
         return false
     }

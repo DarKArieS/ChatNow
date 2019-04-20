@@ -80,7 +80,6 @@ class ChatFragment : Fragment(), ChatView {
         mainActivity?.setUpActionBarHomeButton {
             // logout
             mainActivity?.navigate("LoginFragment")
-            MainModel.setCurrentUserName(this.context!!,"")
         }
 
         rootView.sendButton.setOnClickListener {

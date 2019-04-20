@@ -10,6 +10,11 @@ import io.reactivex.disposables.CompositeDisposable
 class LoginPresenter(private val loginView: LoginView, private val loginModel: LoginModel){
     private var observableList = CompositeDisposable()
     fun login(userName:String){
+        if (userName == ""){
+            loginView.showEmptyNameFail()
+            return
+        }
+
         observableList.add(loginModel.getUserID(userName)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

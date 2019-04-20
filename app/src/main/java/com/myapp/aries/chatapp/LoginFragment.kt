@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.myapp.aries.chatapp.model.LoginModel
+import com.myapp.aries.chatapp.model.MainModel
 import com.myapp.aries.chatapp.presenter.LoginPresenter
 import com.myapp.aries.chatapp.view.LoginView
 import kotlinx.android.synthetic.main.fragment_login.view.*
@@ -49,6 +50,8 @@ class LoginFragment() : Fragment(), LoginView {
                 loginPresenter.login( rootView.nameEditText.editableText.toString() )
         }
 
+        rootView.nameEditText.setText(MainModel.getCurrentUserName(mainActivity!!, "某某人"))
+
         mainActivity?.removeActionBarHomeButton()
         return rootView
     }
@@ -75,5 +78,9 @@ class LoginFragment() : Fragment(), LoginView {
 
     override fun showConnectingFail() {
         Toast.makeText(activity, "連線失敗", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun showEmptyNameFail() {
+        Toast.makeText(activity, "名字不能為空", Toast.LENGTH_SHORT).show()
     }
 }
