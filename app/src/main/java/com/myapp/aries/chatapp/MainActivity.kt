@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
             override fun createFragment(tag: String): Fragment? {
                 return when(tag){
                     "LoginFragment"-> LoginFragment.newInstance()
-                    "ChatFragment"-> ChatFragment.newInstance() //ToDo
+                    "ChatFragment"-> ChatFragment.newInstance()
                     else->null
                 }
             }

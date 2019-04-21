@@ -110,8 +110,6 @@ class ChatFragment : Fragment(), ChatView {
         rootView.floatingActionButton.setOnClickListener {scrollToLast()}
 
         (activity as MainActivity).noHideSoftInputViewList.add(rootView.sendButton)
-
-        //ToDo this guy's touch event can be sent to the views behind it!
         (activity as MainActivity).noHideSoftInputViewList.add(rootView.floatingActionButton)
 
         return rootView
