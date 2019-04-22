@@ -1,7 +1,10 @@
 package com.myapp.aries.chatapp
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -14,8 +17,12 @@ import com.myapp.aries.chatapp.model.ChatContent
 import com.myapp.aries.chatapp.model.ChatModel
 import com.myapp.aries.chatapp.model.MainModel
 import com.myapp.aries.chatapp.presenter.ChatPresenter
+import com.myapp.aries.chatapp.service.NotificationService
 import com.myapp.aries.chatapp.view.ChatView
 import kotlinx.android.synthetic.main.fragment_chat.view.*
+import android.content.Intent
+
+
 
 
 class ChatFragment : Fragment(), ChatView {
@@ -107,6 +114,8 @@ class ChatFragment : Fragment(), ChatView {
 
 
         chatPresenter.startChatSocket()
+        startNotificationService()
+        bindNotificationService()
         rootView.floatingActionButton.setOnClickListener {scrollToLast()}
 
         (activity as MainActivity).noHideSoftInputViewList.add(rootView.sendButton)
@@ -150,6 +159,7 @@ class ChatFragment : Fragment(), ChatView {
     override fun onDestroyView() {
         (activity as MainActivity).noHideSoftInputViewList.clear()
         chatPresenter.stopChatSocket()
+        unbindNotificationService()
         super.onDestroyView()
     }
 
@@ -212,6 +222,41 @@ class ChatFragment : Fragment(), ChatView {
 
     override fun endAsyncProgress() {
         mainActivity?.endProgress()
+    }
+
+    private var mService: NotificationService? = null
+    private var mBinder: NotificationService.ServiceBinder? = null
+    private var hasBounded = false
+    private val serviceConnection = object:ServiceConnection{
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            mBinder = service as NotificationService.ServiceBinder
+            mService = service.getService()
+            hasBounded = true
+            mBinder!!.registerCallback {
+                chatPresenter.getMessage()
+            }
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            mBinder!!.clearRegisterCallback()
+            mBinder = null
+            mService = null
+            hasBounded = false
+        }
+    }
+
+    fun startNotificationService(){
+        val intent = Intent(mainActivity, NotificationService::class.java)
+        this.context?.startService(intent)
+    }
+
+    fun bindNotificationService(){
+        val intent = Intent(this.context, NotificationService::class.java)
+        this.context?.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+    }
+
+    fun unbindNotificationService(){
+        this.context?.unbindService(serviceConnection)
     }
 
 }

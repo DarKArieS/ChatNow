@@ -83,51 +83,51 @@ class ChatPresenter(private val chatView: ChatView, private var chatModel: ChatM
     }
 
     fun startChatSocket(){
-        chatModel.socket.on(Socket.EVENT_CONNECT, object: Emitter.Listener{
-            override fun call(vararg args: Any?) {
-                println("ChatPresenter: socket: connected!")
-                for (msg in args) println(msg)
-            }
-        })
-        chatModel.socket.on(Socket.EVENT_PING, object: Emitter.Listener{
-            override fun call(vararg args: Any?) {
-                println("socket: ping!")
-                for (msg in args) println(msg)
-            }
-        })
-
-        chatModel.socket.on(Socket.EVENT_DISCONNECT, object: Emitter.Listener{
-            override fun call(vararg args: Any?) {
-                //斷線會觸發，會自己連回來
-                println("ChatPresenter: socket: EVENT_DISCONNECT!")
-                for (msg in args) println(msg)
-            }
-        })
-
-        chatModel.socket.on(Socket.EVENT_CONNECT_ERROR, object: Emitter.Listener{
-            override fun call(vararg args: Any?) {
-                //Ping不到會一直觸發
-                println("ChatPresenter: socket: EVENT_CONNECT_ERROR!")
-                for (msg in args) println(msg)
-            }
-        })
-
-        chatModel.socket.on("chatRoom:messages", object: Emitter.Listener{
-            override fun call(vararg args: Any?) {
-                println("ChatPresenter: socket: chatRoom:messages get!")
-                for (msg in args) println(msg)
-                getMessage()
-            }
-        })
-        println("ChatPresenter: socket io connection!")
-
-        if(!chatModel.socket.connected())chatModel.socket.connect()
+//        chatModel.socket.on(Socket.EVENT_CONNECT, object: Emitter.Listener{
+//            override fun call(vararg args: Any?) {
+//                println("ChatPresenter: socket: connected!")
+//                for (msg in args) println(msg)
+//            }
+//        })
+//        chatModel.socket.on(Socket.EVENT_PING, object: Emitter.Listener{
+//            override fun call(vararg args: Any?) {
+//                println("socket: ping!")
+//                for (msg in args) println(msg)
+//            }
+//        })
+//
+//        chatModel.socket.on(Socket.EVENT_DISCONNECT, object: Emitter.Listener{
+//            override fun call(vararg args: Any?) {
+//                //斷線會觸發，會自己連回來
+//                println("ChatPresenter: socket: EVENT_DISCONNECT!")
+//                for (msg in args) println(msg)
+//            }
+//        })
+//
+//        chatModel.socket.on(Socket.EVENT_CONNECT_ERROR, object: Emitter.Listener{
+//            override fun call(vararg args: Any?) {
+//                //Ping不到會一直觸發
+//                println("ChatPresenter: socket: EVENT_CONNECT_ERROR!")
+//                for (msg in args) println(msg)
+//            }
+//        })
+//
+//        chatModel.socket.on("chatRoom:messages", object: Emitter.Listener{
+//            override fun call(vararg args: Any?) {
+//                println("ChatPresenter: socket: chatRoom:messages get!")
+//                for (msg in args) println(msg)
+//                getMessage()
+//            }
+//        })
+//        println("ChatPresenter: socket io connection!")
+//
+//        if(!chatModel.socket.connected())chatModel.socket.connect()
     }
 
     fun stopChatSocket(){
-        chatModel.socket.disconnect()
-        chatModel.socket.off()
-        println("ChatPresenter: socket io disconnection!")
+//        chatModel.socket.disconnect()
+//        chatModel.socket.off()
+//        println("ChatPresenter: socket io disconnection!")
     }
 
     fun cancelRequests(){
