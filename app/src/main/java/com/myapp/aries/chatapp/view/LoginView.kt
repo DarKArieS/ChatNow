@@ -1,5 +1,7 @@
 package com.myapp.aries.chatapp.view
 
+import android.content.Context
+
 interface LoginView {
 
     fun navigateToChat(userID:Int, userName:String)
@@ -8,5 +10,4 @@ interface LoginView {
 
     fun startAsyncProgress()
     fun endAsyncProgress()
-
 }

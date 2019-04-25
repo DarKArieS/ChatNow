@@ -9,17 +9,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.myapp.aries.chatapp.model.LoginModel
-import com.myapp.aries.chatapp.model.MainModel
 import com.myapp.aries.chatapp.presenter.LoginPresenter
 import com.myapp.aries.chatapp.view.LoginView
 import kotlinx.android.synthetic.main.fragment_login.view.*
 
-class LoginFragment() : Fragment(), LoginView {
+class LoginFragment : Fragment(), LoginView {
     private lateinit var rootView:View
     private var mainActivity : MainActivity? = null
 
-    private val loginModel = LoginModel()
-    private val loginPresenter = LoginPresenter(this, loginModel)
+    private lateinit var loginModel : LoginModel
+    private lateinit var loginPresenter : LoginPresenter
     private var isProgressing = false
 
     companion object {
@@ -38,6 +37,13 @@ class LoginFragment() : Fragment(), LoginView {
         super.onAttach(context)
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        //loginPresenter = LoginPresenter(this,LoginModel.getInstance(context))
+        loginModel = LoginModel(this.context!!)
+        loginPresenter = LoginPresenter(this,loginModel)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -50,7 +56,7 @@ class LoginFragment() : Fragment(), LoginView {
                 loginPresenter.login( rootView.nameEditText.editableText.toString() )
         }
 
-        rootView.nameEditText.setText(MainModel.getCurrentUserName(mainActivity!!, "某某人"))
+        rootView.nameEditText.setText(loginPresenter.getSPUserName())
 
         mainActivity?.removeActionBarHomeButton()
         return rootView

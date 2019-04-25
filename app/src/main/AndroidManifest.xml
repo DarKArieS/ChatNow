@@ -12,10 +12,21 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
+        <receiver
+                android:name=".service.ServiceStarter"
+                android:enabled="true"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.AIRPLANE_MODE"/>
+            </intent-filter>
+        </receiver>
+
         <service
                 android:name=".service.NotificationService"
                 android:enabled="true"
-                android:exported="false">
+                android:exported="false"
+                android:persistent="true"
+                android:priority="1000">
         </service>
 
         <activity android:name=".MainActivity">

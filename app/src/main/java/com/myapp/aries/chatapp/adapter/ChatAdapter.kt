@@ -42,7 +42,7 @@ class ChatAdapter (val context: Context, val chatItemList: List<ChatContent>, va
 
     inner class GuestViewHolder(itemView: View): RecyclerView.ViewHolder(itemView), CustomViewHolder{
         init{
-            val a = this.hashCode()
+            //val a = this.hashCode()
             //println("GuestViewHolder created: $a")
         }
         private val guestNameTextView = itemView.guestNameTextView

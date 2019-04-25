@@ -23,6 +23,15 @@ class MainModel{
         fun setCurrentUserName(context: Context, name:String){
             context.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE).edit().putString("NAME",name).apply()
         }
+
+        fun setIsLogIn(context: Context, isLogin:Boolean){
+            context.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE).edit().putBoolean("IS_LOGIN",isLogin).apply()
+        }
+
+        fun getIsLogIn(context: Context):Boolean{
+            return context.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
+                .getBoolean("IS_LOGIN", false)
+        }
     }
 }
 

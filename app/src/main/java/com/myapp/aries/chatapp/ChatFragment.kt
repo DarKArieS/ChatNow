@@ -21,11 +21,9 @@ import com.myapp.aries.chatapp.service.NotificationService
 import com.myapp.aries.chatapp.view.ChatView
 import kotlinx.android.synthetic.main.fragment_chat.view.*
 import android.content.Intent
+import timber.log.Timber
 
-
-
-
-class ChatFragment : Fragment(), ChatView {
+class ChatFragment : Fragment(), ChatView, NotificationService.NotificationListener {
     private lateinit var rootView : View
     private var chatModel = ChatModel()
     private var chatPresenter = ChatPresenter(this, chatModel)
@@ -36,7 +34,7 @@ class ChatFragment : Fragment(), ChatView {
         fun newInstance(userID: Int, userName: String) =
             ChatFragment().apply {
                 arguments = Bundle().apply{
-                    println("ChatFragment newInstance apply:")
+                    Timber.tag("lifecycle").d("ChatFragment newInstance apply")
                     putInt("ARG_USERID", userID)
                     putString("ARG_USERNAME", userName)
                 }
@@ -53,7 +51,7 @@ class ChatFragment : Fragment(), ChatView {
     }
 
     init{
-        println("ChatFragment created!")
+        Timber.tag("lifecycle").d("ChatFragment created!")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,13 +59,6 @@ class ChatFragment : Fragment(), ChatView {
         arguments?.let {
             chatPresenter.userInfo.userID = it.getInt("ARG_USERID",-1)
             chatPresenter.userInfo.userName = it.getString("ARG_USERNAME","")
-
-//            println("ChatFragment: show argument")
-//            println("----------------show Bundle----------------")
-//            for ( key in it.keySet()){
-//                println(key)
-//            }
-//            println("--------------------------------------------")
         }
     }
 
@@ -86,7 +77,12 @@ class ChatFragment : Fragment(), ChatView {
 
         mainActivity?.setUpActionBarHomeButton {
             // logout
+            //stopNotificationService()
+            unbindNotificationService()
+            MainModel.setIsLogIn(this.context!!, false)
+            mService?.checkLogin()
             mainActivity?.navigate("LoginFragment")
+
         }
 
         rootView.sendButton.setOnClickListener {
@@ -100,7 +96,6 @@ class ChatFragment : Fragment(), ChatView {
             }
         }
 
-        //println(chatPresenter.userInfo.userID)
         chatPresenter.updateUserId(MainModel.getCurrentUserName(this.context!!,"")){
             arguments = Bundle().apply{
                 putInt("ARG_USERID", chatPresenter.userInfo.userID)
@@ -112,14 +107,10 @@ class ChatFragment : Fragment(), ChatView {
             chatPresenter.refreshMessage{}
         }
 
-
-        chatPresenter.startChatSocket()
-        startNotificationService()
-        bindNotificationService()
         rootView.floatingActionButton.setOnClickListener {scrollToLast()}
 
-        (activity as MainActivity).noHideSoftInputViewList.add(rootView.sendButton)
-        (activity as MainActivity).noHideSoftInputViewList.add(rootView.floatingActionButton)
+        mainActivity?.noHideSoftInputViewList?.add(rootView.sendButton)
+        mainActivity?.noHideSoftInputViewList?.add(rootView.floatingActionButton)
 
         return rootView
     }
@@ -129,42 +120,25 @@ class ChatFragment : Fragment(), ChatView {
         return layoutManager.findLastVisibleItemPosition()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        println("ChatFragment onSaveInstanceState")
-        println("put something here :D")
-        outState.putString("ARG_STH","Hello~")
-        println("----------------show Bundle----------------")
-        for ( key in outState.keySet()){
-            println(key)
-        }
-        println("--------------------------------------------")
-        println("put something to argument")
-        this.arguments?.putString("ARG_STH","XDD")
-        super.onSaveInstanceState(outState)
+    override fun onPause() {
+        unbindNotificationService()
+        super.onPause()
     }
 
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        println("ChatFragment onViewStateRestored")
-        savedInstanceState?.let{
-            println("----------------show Bundle----------------")
-            for ( key in it.keySet()){
-                println(key)
-            }
-            println("--------------------------------------------")
-        }
-        super.onViewStateRestored(savedInstanceState)
-
+    override fun onResume() {
+        startNotificationService()
+        bindNotificationService()
+        super.onResume()
     }
 
     override fun onDestroyView() {
-        (activity as MainActivity).noHideSoftInputViewList.clear()
-        chatPresenter.stopChatSocket()
-        unbindNotificationService()
+        mainActivity?.noHideSoftInputViewList?.clear()
+        Timber.tag("lifecycle").d("ChatFrag onDestroyView")
         super.onDestroyView()
     }
 
     override fun onDestroy() {
-        println("ChatFragment onDestroy")
+        Timber.tag("lifecycle").d("ChatFragment newInstance apply")
         chatPresenter.cancelRequests()
         super.onDestroy()
     }
@@ -181,7 +155,7 @@ class ChatFragment : Fragment(), ChatView {
         rootView.charRecyclerView.addOnScrollListener(
             object: RecyclerView.OnScrollListener(){
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                    println("onScrollStateChanged: $newState")
+                    Timber.tag("onScroll").d("onScrollStateChanged: $newState")
                     if(newState==0)
                         if(getRecycleViewFinalItemPosition() > (rootView.charRecyclerView.adapter!!.itemCount - 4)){
                         rootView.floatingActionButton.hide()
@@ -190,7 +164,7 @@ class ChatFragment : Fragment(), ChatView {
                 }
 
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-//                    println("onScrolled: $state  dx: $dx dy: $dy ")
+                    //Timber.tag("onScroll").d("onScrolled: $state  dx: $dx dy: $dy ")
                     super.onScrolled(recyclerView, dx, dy)
                 }
             }
@@ -199,8 +173,9 @@ class ChatFragment : Fragment(), ChatView {
 
     override fun receiveNewMessage(){
         //setupAdapter(chatPresenter.chatList)
-        rootView.charRecyclerView.adapter?.notifyDataSetChanged()
         scrollToLast()
+        rootView.charRecyclerView.adapter?.notifyItemRangeInserted(chatPresenter.chatList.lastIndex, 1)
+        //ToDo make custom insert animation!
     }
 
     private fun scrollToLast(){
@@ -231,32 +206,44 @@ class ChatFragment : Fragment(), ChatView {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             mBinder = service as NotificationService.ServiceBinder
             mService = service.getService()
+            mService?.addNotificationListener(this@ChatFragment)
             hasBounded = true
-            mBinder!!.registerCallback {
-                chatPresenter.getMessage()
-            }
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            mBinder!!.clearRegisterCallback()
-            mBinder = null
-            mService = null
-            hasBounded = false
+            clearServiceMember()
         }
     }
 
-    fun startNotificationService(){
+    private fun startNotificationService(){
         val intent = Intent(mainActivity, NotificationService::class.java)
         this.context?.startService(intent)
     }
 
-    fun bindNotificationService(){
+    private fun stopNotificationService(){
+        val intent = Intent(mainActivity, NotificationService::class.java)
+        this.context?.stopService(intent)
+        // Never Stop ~~~~~
+    }
+
+    private fun bindNotificationService(){
         val intent = Intent(this.context, NotificationService::class.java)
         this.context?.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
-    fun unbindNotificationService(){
-        this.context?.unbindService(serviceConnection)
+    private fun unbindNotificationService(){
+        mService?.removeNotificationListener(this@ChatFragment)
+        if(mService!=null) this.context?.unbindService(serviceConnection)
+        clearServiceMember()
     }
 
+    private fun clearServiceMember(){
+        mBinder = null
+        mService = null
+        hasBounded = false
+    }
+
+    override fun onReceiveNewMessage() {
+        chatPresenter.getMessage()
+    }
 }
