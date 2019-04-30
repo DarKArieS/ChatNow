@@ -12,6 +12,7 @@ import com.myapp.aries.chatapp.model.LoginModel
 import com.myapp.aries.chatapp.presenter.LoginPresenter
 import com.myapp.aries.chatapp.view.LoginView
 import kotlinx.android.synthetic.main.fragment_login.view.*
+import timber.log.Timber
 
 class LoginFragment : Fragment(), LoginView {
     private lateinit var rootView:View
@@ -27,7 +28,7 @@ class LoginFragment : Fragment(), LoginView {
     }
 
     init{
-        println("LoginFragment created!")
+        Timber.tag("lifecycle").d("LoginFragment created!")
     }
 
     override fun onAttach(context: Context?) {
@@ -63,13 +64,13 @@ class LoginFragment : Fragment(), LoginView {
     }
 
     override fun onDestroy() {
-        println("LoginFragment onDestroy")
+        Timber.tag("lifecycle").d("LoginFragment onDestroy")
         super.onDestroy()
     }
 
     override fun navigateToChat(userID:Int, userName:String) {
         val chatFragment = ChatFragment.newInstance(userID, userName)
-        mainActivity?.navigate("ChatFragment",chatFragment)
+        mainActivity?.forwardNavigate("ChatFragment",chatFragment,replaceCurrentFragment = true)
     }
 
     override fun startAsyncProgress() {

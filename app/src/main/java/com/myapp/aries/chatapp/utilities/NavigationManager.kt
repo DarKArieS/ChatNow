@@ -2,6 +2,7 @@ package com.myapp.aries.chatapp.utilities
 
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
+import android.support.v4.app.FragmentTransaction
 import com.myapp.aries.chatapp.R
 
 
@@ -10,7 +11,7 @@ abstract class NavigationManager(private val fragmentManager: FragmentManager,
                                  var currentFragmentTag:String)
 {
     init{
-        navigateTo(currentFragmentTag)
+        lateralNavigateTo(currentFragmentTag)
     }
 
     private enum class FragmentStatus{
@@ -19,7 +20,7 @@ abstract class NavigationManager(private val fragmentManager: FragmentManager,
         var existFragment: Fragment? = null
     }
 
-    fun navigateTo(tag:String){
+    fun lateralNavigateTo(tag:String){
         // ToDoDone: study: use show/hide or attach/detach
         // use attach/detach is memory saved but laggy ...
         // attach/detach will remove the fragment from back stack !?
@@ -27,12 +28,6 @@ abstract class NavigationManager(private val fragmentManager: FragmentManager,
         if(status == FragmentStatus.SAME) return
         val currentFrag = fragmentManager.findFragmentByTag(currentFragmentTag)
         val transaction = fragmentManager.beginTransaction()
-//        transaction.setCustomAnimations(
-//            R.anim.slide_in_right,
-//            R.anim.slide_out_left,
-//            R.anim.slide_in_left,
-//            R.anim.slide_out_right
-//        )
         if(currentFrag!=null) transaction.hide(currentFrag)
         if(status == FragmentStatus.ABSENCE){
             status.existFragment = createFragment(tag)
@@ -46,35 +41,39 @@ abstract class NavigationManager(private val fragmentManager: FragmentManager,
     /*
      *  Force to show a new fragment which already instantiated
      */
-    fun navigateTo(tag:String, fragment: Fragment){
-        val status = checkFragmentStatus(tag)
-        if(status == FragmentStatus.SAME){
-            // throw exception
-            throw Exception("NavigationManager: you are already at the fragment you want to navigate!")
-        }
-
-        val currentFrag = fragmentManager.findFragmentByTag(currentFragmentTag)
+    fun forwardNavigateTo(
+        tag:String,
+        fragment: Fragment,
+        addToBackStack:Boolean = false,
+        replaceCurrentFragment:Boolean = false
+    ){
         val transaction = fragmentManager.beginTransaction()
-//        transaction.setCustomAnimations(
-//            R.anim.slide_in_right,
-//            R.anim.slide_out_left,
-//            R.anim.slide_in_left,
-//            R.anim.slide_out_right
-//        )
-        if(currentFrag!=null) transaction.hide(currentFrag)
-        if(status == FragmentStatus.ABSENCE){
-            status.existFragment = fragment
-            transaction.add(fragmentContainer,status.existFragment!!,tag)
-        }else{
-            // throw exception
-            //throw Exception("NavigationManager: the fragment you want to navigate is already existed!")
-            transaction.remove(status.existFragment!!)
-            status.existFragment = fragment
-            transaction.add(fragmentContainer,status.existFragment!!,tag)
+        if(replaceCurrentFragment) transaction.replace(fragmentContainer,fragment,tag)
+        else{
+            val currentFrag = fragmentManager.findFragmentByTag(currentFragmentTag)
+            if(currentFrag!=null) transaction.hide(currentFrag)
+            when(val status = checkFragmentStatus(tag)){
+                FragmentStatus.SAME->return
+                FragmentStatus.ABSENCE->transaction.add(fragmentContainer,fragment,tag)
+                FragmentStatus.EXIST->{
+                    transaction.remove(status.existFragment!!)
+                    transaction.add(fragmentContainer,fragment,tag)
+                }
+            }
         }
-        transaction.commit()
+        if(addToBackStack) transaction.addToBackStack(null)
+        else currentFragmentTag = tag
 
-        currentFragmentTag = tag
+        transaction.commit()
+    }
+
+    fun forwardNavigateTo(
+        tag:String,
+        addToBackStack:Boolean = false,
+        replaceCurrentFragment:Boolean = false
+    ){
+        val fragment = createFragment(tag)
+        forwardNavigateTo(tag,fragment,addToBackStack,replaceCurrentFragment)
     }
 
     private fun checkFragmentStatus(tag:String):FragmentStatus{
@@ -88,6 +87,15 @@ abstract class NavigationManager(private val fragmentManager: FragmentManager,
         return status
     }
 
-    abstract fun createFragment(tag:String):Fragment?
+    private fun setAnimation(transaction:FragmentTransaction){
+        transaction.setCustomAnimations(
+            R.anim.slide_in_right,
+            R.anim.slide_out_left,
+            R.anim.slide_in_left,
+            R.anim.slide_out_right
+        )
+    }
+
+    abstract fun createFragment(tag:String):Fragment
 
 }

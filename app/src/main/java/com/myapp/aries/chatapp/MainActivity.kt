@@ -38,26 +38,40 @@ class MainActivity : AppCompatActivity() {
             R.id.mainFragmentContainer,
             MainModel.getCurrentFragmentTag(this,"LoginFragment")
         ){
-            override fun createFragment(tag: String): Fragment? {
+            override fun createFragment(tag: String): Fragment {
                 return when(tag){
                     "LoginFragment"-> LoginFragment.newInstance()
                     "ChatFragment"-> ChatFragment.newInstance()
-                    else->null
+                    "SettingFragment"->SettingFragment.newInstance()
+                    else-> throw Exception("NavigationManager: can't create the fragment corresponding to the tag $tag")
                 }
             }
         }
     }
 
-    fun navigate(tag:String){
+    fun lateralNavigate(tag:String){
         refreshUIEvent.post {
-            navigationManager.navigateTo(tag)
+            navigationManager.lateralNavigateTo(tag)
         }.run()
     }
 
-    fun navigate(tag:String, fragment: Fragment){
+    fun forwardNavigate(
+        tag:String,
+        addToBackStack:Boolean = false,
+        replaceCurrentFragment:Boolean = false
+    ){
         refreshUIEvent.post {
-            println("refreshUIEvent: I'm running!")
-            navigationManager.navigateTo(tag,fragment)
+            navigationManager.forwardNavigateTo(tag,addToBackStack,replaceCurrentFragment)
+        }.run()
+    }
+
+    fun forwardNavigate(
+        tag:String, fragment: Fragment,
+        addToBackStack:Boolean = false,
+        replaceCurrentFragment:Boolean = false
+    ){
+        refreshUIEvent.post {
+            navigationManager.forwardNavigateTo(tag,fragment,addToBackStack,replaceCurrentFragment)
         }.run()
     }
 
@@ -103,6 +117,10 @@ class MainActivity : AppCompatActivity() {
         if(refreshUIEvent.isSuspended()){
             refreshUIEvent.run()
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
     }
 
     //===================================================================================

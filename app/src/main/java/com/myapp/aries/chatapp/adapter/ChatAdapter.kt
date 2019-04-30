@@ -56,10 +56,10 @@ class ChatAdapter (val context: Context, val chatItemList: List<ChatContent>, va
     }
 
     inner class OwnViewHolder(itemView: View): RecyclerView.ViewHolder(itemView), CustomViewHolder{
-        init{
-            val a = this.hashCode()
+        //init{
+            //val a = this.hashCode()
             //println("OwnViewHolder created: $a")
-        }
+        //}
         private val ownChatTextView = itemView.ownChatTextView
         private val ownDateTextView = itemView.ownDateTextView
         override fun bind(chatItem: ChatContent) {

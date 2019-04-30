@@ -8,9 +8,6 @@ import android.os.IBinder
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import com.myapp.aries.chatapp.adapter.ChatAdapter
 import com.myapp.aries.chatapp.model.ChatContent
@@ -21,6 +18,7 @@ import com.myapp.aries.chatapp.service.NotificationService
 import com.myapp.aries.chatapp.view.ChatView
 import kotlinx.android.synthetic.main.fragment_chat.view.*
 import android.content.Intent
+import android.view.*
 import timber.log.Timber
 
 class ChatFragment : Fragment(), ChatView, NotificationService.NotificationListener {
@@ -75,15 +73,7 @@ class ChatFragment : Fragment(), ChatView, NotificationService.NotificationListe
     ): View? {
         rootView = inflater.inflate(R.layout.fragment_chat, container, false)
 
-        mainActivity?.setUpActionBarHomeButton {
-            // logout
-            //stopNotificationService()
-            unbindNotificationService()
-            MainModel.setIsLogIn(this.context!!, false)
-            mService?.checkLogin()
-            mainActivity?.navigate("LoginFragment")
-
-        }
+        setupAppBar()
 
         rootView.sendButton.setOnClickListener {
             chatPresenter.sendMessage(rootView.editText.editableText.toString())
@@ -115,6 +105,14 @@ class ChatFragment : Fragment(), ChatView, NotificationService.NotificationListe
         return rootView
     }
 
+    override fun onHiddenChanged(hidden: Boolean) {
+        Timber.tag("lifecycle").d("ChatFrag onHiddenChanged $hidden")
+        if(!hidden){
+            setupAppBar()
+        }
+        super.onHiddenChanged(hidden)
+    }
+
     private fun getRecycleViewFinalItemPosition():Int{
         val layoutManager = rootView.charRecyclerView.layoutManager as LinearLayoutManager
         return layoutManager.findLastVisibleItemPosition()
@@ -138,9 +136,43 @@ class ChatFragment : Fragment(), ChatView, NotificationService.NotificationListe
     }
 
     override fun onDestroy() {
-        Timber.tag("lifecycle").d("ChatFragment newInstance apply")
+        Timber.tag("lifecycle").d("ChatFragment onDestroy")
         chatPresenter.cancelRequests()
         super.onDestroy()
+    }
+
+    private fun setupAppBar(){
+        mainActivity?.setUpActionBarHomeButton {
+            // logout
+            //stopNotificationService()
+            unbindNotificationService()
+            MainModel.setIsLogIn(this.context!!, false)
+            mService?.checkLogin()
+            mainActivity?.forwardNavigate(
+                "LoginFragment",
+                replaceCurrentFragment = true
+            )
+        }
+
+        this.setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater?.inflate(R.menu.chat_appbar_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when(item?.itemId){
+            R.id.appbar_action_setting->{
+                Timber.tag("menu").d("click setting!")
+                mainActivity?.forwardNavigate(
+                    "SettingFragment",
+                    addToBackStack = true
+                )
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private fun setupAdapter(chatList: List<ChatContent>){
@@ -174,7 +206,7 @@ class ChatFragment : Fragment(), ChatView, NotificationService.NotificationListe
     override fun receiveNewMessage(){
         //setupAdapter(chatPresenter.chatList)
         scrollToLast()
-        rootView.charRecyclerView.adapter?.notifyItemRangeInserted(chatPresenter.chatList.lastIndex, 1)
+        rootView.charRecyclerView.adapter?.notifyDataSetChanged()
         //ToDo make custom insert animation!
     }
 
