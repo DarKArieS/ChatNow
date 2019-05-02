@@ -12,6 +12,11 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
+        <service
+                android:name=".service.NotificationJobService"
+                android:permission="android.permission.BIND_JOB_SERVICE">
+        </service>
+
         <receiver
                 android:name=".service.ServiceStarter"
                 android:enabled="true"

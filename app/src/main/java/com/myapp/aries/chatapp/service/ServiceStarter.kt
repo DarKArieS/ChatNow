@@ -6,7 +6,7 @@ import android.content.Intent
 import timber.log.Timber
 
 class ServiceStarter : BroadcastReceiver() {
-
+    // Broadcast is dead in Android O :x
     override fun onReceive(context: Context, intent: Intent) {
         Timber.tag("myNoti").d("ServiceStarter: Receive call!")
 

@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.preference.PreferenceScreen
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    <android.support.v7.preference.ListPreference
+            android:defaultValue="1"
+            android:title="通知類型"
+            android:summary="設置通知顯示方式"
+            android:entries="@array/notification_type"
+            android:entryValues="@array/notification_type_code"
+            android:key="NotificationTypePreference"
+    />
 
-    <Preference
-            app:key="TestPreference"
-            app:title="Hello"
-            app:summary="Report technical issues or suggest new features"/>
+    <!--<MultiSelectListPreference-->
+            <!--android:dialogTitle="MultiSelectListPreferenceDialog"-->
+            <!--android:entries="@array/notification_type"-->
+            <!--android:entryValues="@array/notification_type_code"-->
+            <!--android:key="key_multi_select_list_pref"-->
+            <!--android:summary="MultiSelectListPreference summary"-->
+            <!--android:title="MultiSelectListPreference"-->
+    <!--/>-->
+
+    <android.support.v7.preference.Preference
+            android:title="關於"
+            android:summary="關於ChatNow"
+            android:key="AboutPreference"
+    />
 
 </android.support.v7.preference.PreferenceScreen>

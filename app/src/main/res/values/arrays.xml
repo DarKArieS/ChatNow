@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="notification_type">
+        <item>不開啟通知</item>
+        <item>型態一</item>
+        <item>型態二</item>
+    </string-array>
+
+    <string-array name="notification_type_code">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+</resources>

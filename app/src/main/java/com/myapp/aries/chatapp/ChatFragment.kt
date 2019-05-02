@@ -1,5 +1,7 @@
 package com.myapp.aries.chatapp
 
+import android.app.job.JobInfo
+import android.app.job.JobScheduler
 import android.content.ComponentName
 import android.content.Context
 import android.content.ServiceConnection
@@ -19,6 +21,7 @@ import com.myapp.aries.chatapp.view.ChatView
 import kotlinx.android.synthetic.main.fragment_chat.view.*
 import android.content.Intent
 import android.view.*
+import com.myapp.aries.chatapp.service.NotificationJobService
 import timber.log.Timber
 
 class ChatFragment : Fragment(), ChatView, NotificationService.NotificationListener {
@@ -102,6 +105,7 @@ class ChatFragment : Fragment(), ChatView, NotificationService.NotificationListe
         mainActivity?.noHideSoftInputViewList?.add(rootView.sendButton)
         mainActivity?.noHideSoftInputViewList?.add(rootView.floatingActionButton)
 
+        startJobService()
         return rootView
     }
 
@@ -277,5 +281,16 @@ class ChatFragment : Fragment(), ChatView, NotificationService.NotificationListe
 
     override fun onReceiveNewMessage() {
         chatPresenter.getMessage()
+    }
+
+    private fun startJobService(){
+        val jobScheduler = mainActivity!!.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+
+        val jobInfo = JobInfo
+            .Builder(11,ComponentName(this.context!!,NotificationJobService::class.java))
+            .setOverrideDeadline(0)
+            .build()
+
+        jobScheduler.schedule(jobInfo)
     }
 }
