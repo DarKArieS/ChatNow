@@ -24,6 +24,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         println("Activity onCreate")
         startShowFragment()
+
     }
 
     override fun onDestroy() {

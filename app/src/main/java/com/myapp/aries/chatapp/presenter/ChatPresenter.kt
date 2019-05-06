@@ -20,9 +20,9 @@ class ChatPresenter(private val chatView: ChatView, private var chatModel: ChatM
     private var observableList = CompositeDisposable()
 
     fun updateUserId(userName:String, callback: () -> Unit){
-        if(userInfo.userID!=-1){
-            callback.invoke()
-        }else{
+//        if(userInfo.userID!=-1){
+//            callback.invoke()
+//        }else{
             observableList.add(chatModel.getUserID(userName)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -36,7 +36,7 @@ class ChatPresenter(private val chatView: ChatView, private var chatModel: ChatM
                     callback.invoke()
                 },{chatView.showConnectingFail()})
             )
-        }
+//        }
     }
 
     fun getMessage(){

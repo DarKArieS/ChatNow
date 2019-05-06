@@ -31,36 +31,11 @@ class ChatFragment : Fragment(), ChatView, NotificationService.NotificationListe
     private var mainActivity : MainActivity? = null
 
     companion object {
-        @JvmStatic
-        fun newInstance(userID: Int, userName: String) =
-            ChatFragment().apply {
-                arguments = Bundle().apply{
-                    Timber.tag("lifecycle").d("ChatFragment newInstance apply")
-                    putInt("ARG_USERID", userID)
-                    putString("ARG_USERNAME", userName)
-                }
-            }
-
-        fun newInstance() =
-            ChatFragment().apply {
-                arguments = Bundle().apply{
-                    // No UserInfo
-                    putInt("ARG_USERID", -1)
-                    putString("ARG_USERNAME", "")
-                }
-            }
+        fun newInstance() = ChatFragment()
     }
 
     init{
         Timber.tag("lifecycle").d("ChatFragment created!")
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            chatPresenter.userInfo.userID = it.getInt("ARG_USERID",-1)
-            chatPresenter.userInfo.userName = it.getString("ARG_USERNAME","")
-        }
     }
 
     override fun onAttach(context: Context?) {
@@ -90,10 +65,6 @@ class ChatFragment : Fragment(), ChatView, NotificationService.NotificationListe
         }
 
         chatPresenter.updateUserId(MainModel.getCurrentUserName(this.context!!,"")){
-            arguments = Bundle().apply{
-                putInt("ARG_USERID", chatPresenter.userInfo.userID)
-                putString("ARG_USERNAME", chatPresenter.userInfo.userName)
-            }
             rootView.showNameTextView.text = chatPresenter.userInfo.userName
             setupAdapter(chatPresenter.chatList)
             MainModel.setCurrentUserName(this.context!!,chatPresenter.userInfo.userName)

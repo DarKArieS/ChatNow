@@ -69,7 +69,7 @@ class LoginFragment : Fragment(), LoginView {
     }
 
     override fun navigateToChat(userID:Int, userName:String) {
-        val chatFragment = ChatFragment.newInstance(userID, userName)
+        val chatFragment = ChatFragment.newInstance()
         mainActivity?.forwardNavigate("ChatFragment",chatFragment,replaceCurrentFragment = true)
     }
 
