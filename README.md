@@ -29,5 +29,3 @@
 - [RxJava2](http://reactivex.io/)
 - [Socket.io](https://socket.io/)
 - MVP 架構
-
-感謝 SoJ 提供簡易的Socket.io後端!
