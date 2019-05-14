@@ -29,6 +29,9 @@ class LoginModel(val context: Context){
     //From Shared Preference
 
     fun getSPUserName() = MainModel.getCurrentUserName(context, "某某人")
-    fun setSPUserName(isLogin:Boolean) = MainModel.setIsLogIn(context, isLogin)
+    fun setSPUserName(isLogin:Boolean, userName: String) {
+        MainModel.setIsLogIn(context, isLogin)
+        MainModel.setCurrentUserName(context, userName)
+    }
 
 }

@@ -4,7 +4,7 @@ import android.content.Context
 
 interface LoginView {
 
-    fun navigateToChat(userID:Int, userName:String)
+    fun navigateToChat()
     fun showConnectingFail()
     fun showEmptyNameFail()
 

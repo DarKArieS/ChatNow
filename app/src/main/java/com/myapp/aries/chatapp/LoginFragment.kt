@@ -68,7 +68,7 @@ class LoginFragment : Fragment(), LoginView {
         super.onDestroy()
     }
 
-    override fun navigateToChat(userID:Int, userName:String) {
+    override fun navigateToChat() {
         val chatFragment = ChatFragment.newInstance()
         mainActivity?.forwardNavigate("ChatFragment",chatFragment,replaceCurrentFragment = true)
     }

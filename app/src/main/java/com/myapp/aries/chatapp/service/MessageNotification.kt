@@ -28,6 +28,26 @@ class MessageNotificationManager(val context: Context) {
         if (newMessageList.size == 0) return
         mBuilder.setNotificationContent(newMessageList[0])
         mNotificationManager.notify(newMessageList[0].id, mBuilder.build())
+
+//        val summaryNotification = mBuilder
+//            .setContentTitle("Summary")
+//            //set content text to support devices running API level < 24
+//            .setContentText("Two new messages")
+//            .setSmallIcon(R.drawable.ic_message_black_24dp)
+//            //build summary info into InboxStyle template
+//            .setStyle(NotificationCompat.InboxStyle()
+//                .addLine("Alex Faarborg Check this out")
+//                .addLine("Jeff Chang Launch Party")
+//                .setBigContentTitle("2 new messages")
+//                .setSummaryText("janedoe@example.com"))
+//            //specify which group this notification belongs to
+//            .setGroup("Notification_Group")
+//            //set this notification as the summary for the group
+//            .setGroupSummary(true)
+//            .build()
+//
+//        mNotificationManager.notify(100, summaryNotification)
+
         newMessageList.removeAt(0)
     }
 

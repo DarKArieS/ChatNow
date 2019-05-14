@@ -24,8 +24,8 @@ class LoginPresenter(private val loginView: LoginView, private val loginModel: L
                 val responseString = it.body()!!.string()
                 //println(responseString)
                 val userID = responseString.toInt()
-                loginView.navigateToChat(userID, userName)
-                loginModel.setSPUserName(true)
+                loginView.navigateToChat()
+                loginModel.setSPUserName(true, userName)
             },{loginView.showConnectingFail()})
         )
     }
