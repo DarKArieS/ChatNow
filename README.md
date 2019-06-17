@@ -1,6 +1,6 @@
 # ChatNow
 
-取個名字，進入只有一間的聊天室開始聊天吧！
+取個名字，進入只有一間的聊天室開始聊天吧!
 
 <img src="https://i.imgur.com/HV0BWYq.gif" width="200">
 
