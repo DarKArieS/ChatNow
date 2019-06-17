@@ -2,6 +2,7 @@ package com.myapp.aries.chatapp.model
 
 import io.reactivex.Single
 import io.socket.client.IO
+import okhttp3.Interceptor
 
 import okhttp3.ResponseBody
 import retrofit2.Response

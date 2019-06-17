@@ -205,6 +205,15 @@ class RxPlayground{
             }
         })
 
+        val disposable = observable
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ output->
+                //onNext
+            },{ e->
+                //onError
+            })
+
 //        observable
 //            .subscribeOn(Schedulers.newThread())
 //            .observeOn(AndroidSchedulers.mainThread())
